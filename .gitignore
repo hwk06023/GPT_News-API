@@ -1,0 +1,17 @@
+.env
+**/.env
+
+*.zip
+**/*.zip
+
+venv/
+**/venv
+
+package/
+**/package
+
+__pycache__/
+
+lambda_package/
+
+opt/
