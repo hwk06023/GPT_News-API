@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-from utils.news_api import fetch_news
+from utils.crawl_news import fetch_news
 from enum import Enum
 import json
 import requests
@@ -14,26 +14,36 @@ class Country(Enum):
 
 
 class Category(Enum):
-    GENERAL = "general"
-    ENTERTAINMENT = "entertainment"
-    SPORTS = "sports"
-    SCIENCE = "science"
-    TECHNOLOGY = "technology"
-    BUSINESS = "business"
-    HEALTH = "health"
-
-
-"""
-Only "Source" can be used when specifying "Source".
-
-When specifying "Country", the use of "Source" is not allowed.
-When specifying "Category", the use of "Source" is not allowed.
-
-Both "Country" and "Category" can be used at the same time.
-"""
+    ENTERTAINMENT = "Entertainment"
+    SPORTS = "Sports"
+    SCIENCE_TECHNOLOGY = "Science/Technology"
+    BUSINESS = "Business"
+    HEALTH = "Health"
 
 
 def lambda_handler(event, context):
+    genre_url_dict = {
+        Category.ENTERTAINMENT: "CAAqJggKIiBDQkFTRWdvSUwyMHZNREpxYW5RU0FtdHZHZ0pMVWlnQVAB?hl=",
+        Category.SPORTS: "CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0FtdHZHZ0pMVWlnQVAB?hl=",
+        Category.SCIENCE_TECHNOLOGY: "CAAqKAgKIiJDQkFTRXdvSkwyMHZNR1ptZHpWbUVnSnJieG9DUzFJb0FBUAE?hl=",
+        Category.BUSINESS: "CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVdZU0FtdHZHZ0pMVWlnQVAB?hl=",
+        Category.HEALTH: "CAAqIQgKIhtDQkFTRGdvSUwyMHZNR3QwTlRFU0FtdHZLQUFQAQ?hl=",
+    }
+    common_url = "https://news.google.com/topics/"
+    urls = {
+        Country.US: common_url
+        + genre_url_dict[Category.ENTERTAINMENT]
+        + "en-US&gl=US&ceid=US%3Aen",
+        Country.CN: common_url
+        + genre_url_dict[Category.ENTERTAINMENT]
+        + "zh-CN&gl=CN&ceid=CN%3Azh-Hans",
+        Country.KR: common_url
+        + genre_url_dict[Category.ENTERTAINMENT]
+        + "ko-KR&gl=KR&ceid=KR%3Ako",
+        Country.JP: common_url
+        + genre_url_dict[Category.ENTERTAINMENT]
+        + "ja&gl=JP&ceid=JP%3Aja",
+    }
     results = {
         Country.US: dict(),
         Country.CN: dict(),
@@ -45,21 +55,25 @@ def lambda_handler(event, context):
         results[Country.US] = executor.submit(
             fetch_news,
             Country.US.value,
+            urls[Country.US],
             Category.ENTERTAINMENT.value,
         )
         results[Country.CN] = executor.submit(
             fetch_news,
             Country.CN.value,
+            urls[Country.CN],
             Category.ENTERTAINMENT.value,
         )
         results[Country.KR] = executor.submit(
             fetch_news,
             Country.KR.value,
+            urls[Country.KR],
             Category.ENTERTAINMENT.value,
         )
         results[Country.JP] = executor.submit(
             fetch_news,
             Country.JP.value,
+            urls[Country.JP],
             Category.ENTERTAINMENT.value,
         )
 
